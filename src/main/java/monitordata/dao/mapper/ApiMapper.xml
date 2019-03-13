@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="monitordata.dao.ApiDao">
+    <!-- 思博学院 -->
+    <!--获取所有电表的 -->
+    <select id="getElectricityMeterParameter" resultType="java.util.Map">
+        SELECT
+            ID,
+            IFNULL(vol_A, 0)AS vol_A,
+            IFNULL(vol_B, 0) AS vol_B,
+            IFNULL(vol_C, 0) AS vol_C,
+            IFNULL(cur_A, 0) AS cur_A,
+            IFNULL(cur_B, 0) AS cur_B,
+            IFNULL(cur_C, 0) AS cur_C,
+            IFNULL(cur_Total, 0) AS cur_Total,
+            IFNULL(rate_A, 0) AS rate_A,
+            IFNULL(rate_B, 0) AS rate_B,
+            IFNULL(rate_C, 0) AS rate_C,
+            IFNULL(rate_Total, 0) AS rate_Total,
+            DATE_FORMAT(date,'%Y-%m-%d %H:%i:%s') AS date
+        FROM canshu
+        ORDER BY date DESC LIMIT 0,1
+    </select>
+    <!-- 获取规定日期内的电表参数 -->
+    <select id="getElectricityMeterParameterByTimeZones"  parameterType="map" resultType="java.util.Map">
+       SELECT
+            ID, IFNULL(vol_A, 0) AS vol_A,
+            IFNULL(vol_B, 0) AS vol_B,
+            IFNULL(vol_C, 0) AS vol_C,
+            IFNULL(cur_A, 0) AS cur_A,
+            IFNULL(cur_B, 0) AS cur_B,
+            IFNULL(cur_C, 0) AS cur_C,
+            IFNULL(cur_Total, 0) AS cur_Total,
+            IFNULL(rate_A, 0) AS rate_A,
+            IFNULL(rate_B, 0) AS rate_B,
+            IFNULL(rate_C, 0) AS rate_C,
+            IFNULL(rate_Total, 0) AS rate_Total,
+            DATE_FORMAT(date,'%Y-%m-%d %H:%i:%s') AS date
+        FROM canshu
+        WHERE 1=1
+        <if test="ID != null and ID != ''">
+            AND ID = #{ID}
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND date BETWEEN #{startTime} AND #{endTime}
+        </if>
+        ORDER BY date DESC
+    </select>
+    <!-- 获取最新一条的刷卡记录 -->
+    <select id="getLatestSwipeRecord" resultType="java.util.Map">
+        SELECT A.f_ReadDate, B.f_ConsumerName, C.f_ReaderName
+        FROM t_d_SwipeRecord AS A
+        LEFT JOIN t_b_Consumer AS B ON B.f_ConsumerID = A.f_ConsumerID
+        LEFT JOIN t_b_Reader AS C ON C.f_ReaderID = A.f_ReaderID
+        ORDER BY A.f_ReadDate DESC
+    </select>
+    <!-- 刷卡历史记录 -->
+    <select id="getHistoryOfSwipeRecord" parameterType="map" resultType="java.util.Map">
+        SELECT A.*, B.*, C.*
+        FROM t_d_SwipeRecord AS A
+        LEFT JOIN t_b_Consumer AS B ON B.f_ConsumerID = A.f_ConsumerID
+        LEFT JOIN t_b_Reader AS C ON C.f_ReaderID = A.f_ReaderID
+        WHERE 1=1
+        <if test="f_consumerID != null and f_consumerID != ''">
+            AND f_ConsumerID = #{f_consumerID}
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND A.f_ReadDate BETWEEN #{startTime} AND #{endTime}
+        </if>
+        <if test="f_ReaderID != null and f_ReaderID != ''">
+            AND f_ReaderID = #{f_ReaderID}
+        </if>
+        ORDER BY A.f_ReadDate DESC
+    </select>
+    <!-- 获取今天最新一条异常电表参数 -->
+    <select id="getAbnormalElectricityMeterParameter" parameterType="map" resultType="java.util.Map">
+        SELECT
+            ID,
+            IFNULL(vol_A, 0) AS vol_A,
+            IFNULL(vol_B, 0) AS vol_B,
+            IFNULL(vol_C, 0) AS vol_C,
+            IFNULL(cur_A, 0) AS cur_A,
+            IFNULL(cur_B, 0) AS cur_B,
+            IFNULL(cur_C, 0) AS cur_C,
+            IFNULL(cur_Total, 0) AS cur_Total,
+            IFNULL(rate_A, 0) AS rate_A,
+            IFNULL(rate_B, 0) AS rate_B,
+            IFNULL(rate_C, 0) AS rate_C,
+            IFNULL(rate_Total, 0) AS rate_Total,
+            DATE_FORMAT(date,'%Y-%m-%d %H:%i:%s') AS date
+        FROM canshu
+        WHERE (date BETWEEN #{startDate} AND #{endDate}) AND (vol_A NOT BETWEEN 1980 AND 2350)
+        ORDER BY date DESC LIMIT 0,1
+    </select>
+
+    <!-- 科技学院 -->
+    <!-- 获取最新一条的电表参数 -->
+    <select id="getDbParameter" resultType="java.util.Map">
+       SELECT top 1
+          ISNULL(vol_A, 0)AS vol_A,
+          ISNULL(vol_B, 0) AS vol_B,
+          ISNULL(vol_C, 0) AS vol_C,
+          ISNULL(cur_A, 0) AS cur_A,
+          ISNULL(cur_B, 0) AS cur_B,
+          ISNULL(cur_C, 0) AS cur_C,
+          ISNULL(rate, 0) AS rate,
+          CONVERT(varchar, date,120) AS date
+      FROM dianbiao
+      ORDER BY date DESC
+    </select>
+    <!-- 获取规定时间内的电表参数 -->
+    <select id="getDbParameterByTimeZones" parameterType="map" resultType="java.util.Map">
+        SELECT
+            ISNULL(vol_A, 0)AS vol_A,
+            ISNULL(vol_B, 0) AS vol_B,
+            ISNULL(vol_C, 0) AS vol_C,
+            ISNULL(cur_A, 0) AS cur_A,
+            ISNULL(cur_B, 0) AS cur_B,
+            ISNULL(cur_C, 0) AS cur_C,
+            ISNULL(rate, 0) AS rate,
+            CONVERT(varchar, date,120) AS date
+        FROM dianbiao
+        WHERE 1=1
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND date BETWEEN #{startTime} AND #{endTime}
+        </if>
+        ORDER BY date DESC
+    </select>
+    <!-- 获取最新一条有异常的电表参数 -->
+    <select id="getAbnormalDbParameter" parameterType="map" resultType="java.util.Map">
+        SELECT top 1
+            ISNULL(vol_A, 0)AS vol_A,
+            ISNULL(vol_B, 0) AS vol_B,
+            ISNULL(vol_C, 0) AS vol_C,
+            ISNULL(cur_A, 0) AS cur_A,
+            ISNULL(cur_B, 0) AS cur_B,
+            ISNULL(cur_C, 0) AS cur_C,
+            ISNULL(rate, 0) AS rate,
+            CONVERT(varchar, date,120) AS date
+        FROM dianbiao
+        WHERE (date BETWEEN #{startDate} AND #{endDate}) AND (vol_A NOT BETWEEN 1980 AND 2350)
+        ORDER BY date DESC;
+    </select>
+    <!-- 获取空调的最新一条参数 -->
+    <select id="getAri_ConditionerParameter" parameterType="map" resultType="java.util.Map">
+        SELECT top 1
+          Temperature,
+          Humidity,
+          CONVERT(varchar, Date,120) AS Date
+        FROM
+        <if test="ari_conditionerCode == 1">
+            kongtiao1
+        </if>
+        <if test="ari_conditionerCode == 2">
+            kongtiao2
+        </if>
+        <if test="ari_conditionerCode == 3">
+            kongtiao3
+        </if>
+        ORDER BY Date DESC
+    </select>
+    <!-- 获取一定范围内的空调的参数 -->
+    <select id="getAri_ConditionerParameterByTimeZones" parameterType="map" resultType="java.util.Map">
+        SELECT
+            A.Temperature,
+            A.Humidity,
+            CONVERT(varchar, Date,120) AS Date
+        FROM
+            <if test="ari_conditionerCode == 1">
+                kongtiao1
+            </if>
+            <if test="ari_conditionerCode == 2">
+                kongtiao2
+            </if>
+            <if test="ari_conditionerCode == 3">
+                kongtiao3
+            </if>
+        AS A
+        WHERE 1=1
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND A.Date BETWEEN #{startTime} AND #{endTime}
+        </if>
+        ORDER BY A.Date DESC
+    </select>
+    <!-- 获取空调的最新一条的异常记录 -->
+    <select id="getAbnormalAri_ConditionerParameter" parameterType="map" resultType="java.util.Map">
+        SELECT top 1
+            A.Temperature,
+            A.Humidity,
+            CONVERT(varchar, Date,120) AS Date
+        FROM
+            <if test="ari_conditionerCode == 1">
+                kongtiao1
+            </if>
+            <if test="ari_conditionerCode == 2">
+                kongtiao2
+            </if>
+            <if test="ari_conditionerCode == 3">
+                kongtiao3
+            </if>
+        AS A
+        WHERE (A.Date BETWEEN #{startDate} AND #{endDate}) AND (A.Temperature > 210)
+        ORDER BY A.Date DESC;
+    </select>
+    <!-- 获取人员的位置信息 -->
+    <select id="getLocationInfo" parameterType="string" resultType="java.util.Map">
+        SELECT top 1
+            A.personID,
+            A.person AS personName,
+            A.personType AS sex,
+            A.devID,
+            A.devName,
+            A.department,
+            B.Device,
+            B.building,
+            B.Floor,
+            B.dbX,
+            B.dbY,
+            B.dbH,
+            CONVERT(varchar(100), A.locateTime, 20) AS locateTime
+        FROM sans_personLocate AS A
+        LEFT JOIN sans_PersonDevice AS B ON A.devID = B.Device
+        WHERE A.personID = #{personId}
+        order by A.locateTime desc
+    </select>
+
+    <select id="getKJLatestSwipeRecord" parameterType="string" resultType="java.util.Map">
+        select top 1 F.f_DoorID,  C.f_ReaderName, C.f_ReaderID,
+         CONVERT(varchar(100), A.f_ReadDate, 120) f_ReadDate, A.f_ConsumerID, B.f_ConsumerName, A.f_CardNO,  A.f_InOut, A.f_Character
+        from t_d_SwipeRecord as A
+        left join t_b_Consumer as B ON B.f_ConsumerID = A.f_ConsumerID and B.f_ConsumerName is not null
+        left join t_b_Reader as C ON C.f_ReaderID = A.f_ReaderID
+        left join t_b_Controller as D ON D.f_ControllerID = C.f_ControllerID
+        left join t_b_Door as F ON F.f_ControllerID = D.f_ControllerID
+        where 1=1 and  SUBSTRING(C.f_ReaderName, 0, len(C.f_ReaderName)-2) = F.f_DoorName
+        and B.f_ConsumerID != 0 AND F.f_DoorID = #{doorID}
+        ORDER BY A.f_ReadDate DESC
+    </select>
+    <select id="getKJHistoryOfSwipeRecord" parameterType="map" resultType="java.util.Map">
+        select
+            A.f_DoorID,
+            C.f_ReaderName,
+            C.f_ReaderID,
+            CONVERT(varchar(100), D.f_ReadDate, 120) f_ReadDate,
+            D.f_ConsumerID,
+            E.f_ConsumerName,
+            D.f_CardNO,
+            D.f_InOut,
+            case D.f_Character when 1 then '正常'
+            else '无权限异常刷卡' end  as f_Character
+        from t_b_Door as A
+        left join t_b_Controller as B on A.f_ControllerID = B.f_ControllerID
+        left join t_b_Reader as C on B.f_ControllerID = C.f_ControllerID
+        left join t_d_SwipeRecord as D on C.f_ReaderID = D.f_ReaderID
+        left join t_b_Consumer as E on D.f_ConsumerID = E.f_ConsumerID
+        where 1=1 AND SUBSTRING(C.f_ReaderName, 0, len(C.f_ReaderName)-2) = A.f_DoorName  AND D.f_ConsumerID != 0 AND E.f_ConsumerName is not null
+        <if test="doorID != null and doorID.trim() != ''">
+            AND A.f_DoorID = #{doorID}
+        </if>
+        <if test="f_ConsumerName != null and f_ConsumerName.trim() != ''">
+            AND E.f_ConsumerName = #{f_ConsumerName}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND D.f_ReadDate >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND #{endTime} >= D.f_ReadDate
+        </if>
+        ORDER BY D.f_ReadDate DESC
+    </select>
+    <select id="getKJAbnormalSwipeRecord" resultType="java.util.Map">
+        select
+        A.f_DoorID,
+        C.f_ReaderName,
+        C.f_ReaderID,
+        CONVERT(varchar(100), D.f_ReadDate, 120) f_ReadDate,
+        D.f_ConsumerID,
+        E.f_ConsumerName,
+        D.f_CardNO,
+        D.f_InOut,
+        case D.f_Character when 1 then '正常'
+        else '无权限异常刷卡' end as f_Character
+        from t_b_Door as A
+        left join t_b_Controller as B on A.f_ControllerID = B.f_ControllerID
+        left join t_b_Reader as C on B.f_ControllerID = C.f_ControllerID
+        left join t_d_SwipeRecord as D on C.f_ReaderID = D.f_ReaderID
+        left join t_b_Consumer as E on D.f_ConsumerID = E.f_ConsumerID
+        where 1=1 AND D.f_Character != 1 AND SUBSTRING(C.f_ReaderName, 0, len(C.f_ReaderName)-2) = A.f_DoorName  AND D.f_ConsumerID != 0 AND E.f_ConsumerName is not null
+        <if test="doorID != null and doorID.trim() != ''">
+            AND A.f_DoorID = #{doorID}
+        </if>
+        <if test="f_ConsumerName != null and f_ConsumerName.trim() != ''">
+            AND E.f_ConsumerName = #{f_ConsumerName}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND D.f_ReadDate >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND #{endTime} >= D.f_ReadDate
+        </if>
+        ORDER BY D.f_ReadDate DESC
+    </select>
+
+    <delete id="deleteKjData">
+        DELETE FROM t_d_SwipeRecord WHERE (select convert(varchar(20),dateadd(MONTH,-1,getdate()),120)) >= f_ReadDate
+    </delete>
+
+    <delete id="delHKDiaobiao">
+        delete from dianbiao where CONVERT(varchar(100), dateadd(month,-6,GETDATE()), 120) > date
+    </delete>
+
+    <delete id="delHKKongtiao1">
+        delete from kongtiao1 where CONVERT(varchar(100), dateadd(month,-6,GETDATE()), 120) > Date
+    </delete>
+
+    <delete id="delHKKongtiao2">
+        delete from kongtiao2 where CONVERT(varchar(100), dateadd(month,-6,GETDATE()), 120) > Date
+    </delete>
+
+    <delete id="delHKKongtiao3">
+        delete from kongtiao3 where CONVERT(varchar(100), dateadd(month,-6,GETDATE()), 120) > Date
+    </delete>
+</mapper>
